@@ -11,33 +11,38 @@
 </template>
 
 <script>
-import axios from "axios"
+import axios from 'axios'
+import setItem from '../auth/setItem'
   export default {
-    data() {
+    emits: ['redirectToChatRoom'],
+    data () {
       return {
-        email: "",
-        password: "",
+        email: '',
+        password: '',
         error: null
       }
     },
     methods: {
-      async login () {
+      async login() {
         try {
           this.error = null
-
-          const res = await await axios.post("http://localhost:3000/auth/sign_in", {
+          const res = await axios.post('http://localhost:3000/auth/sign_in', {
             email: this.email,
-            password: this.password
+            password: this.password,
           }
          )
          if (!res) {
-          throw new Error("メールアドレスかパスワードが違います")
+          throw new Error('メールアドレスかパスワードが違います')
+         }
+         if (!this.error) {
+          setItem(res.headers, res.data.data.name)
+          this.$emit('redirectToChatRoom')
          }
          console.log({ res })
          return res
-        } catch(error) {
+        } catch (error) {
           console.log({ error })
-          this.error = "メールアドレスかパスワードが違います"
+          this.error = 'メールアドレスかパスワードが違います'
         }
       }
     }
