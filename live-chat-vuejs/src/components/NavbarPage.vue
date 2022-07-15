@@ -3,6 +3,7 @@
     <div>
       <p>こんにちは<span class="name">{{ name }}</span>さん</p>
       <p class="email">現在、{{ email }}でログイン中です</p>
+      <div class="error">{{ error }}</div>
     </div>
     <button @click="logout">ログアウト</button>
   </nav>
@@ -14,11 +15,13 @@ export default {
   data () {
     return {
       name: window.localStorage.getItem("name"),
-      email: window.localStorage.getItem("uid")
+      email: window.localStorage.getItem("uid"),
+      error: null
     }
   },
   methods: {
     async logout () {
+      this.error = null
       try {
         const res = await axios.delete("http://localhost:3000/auth/sign_out", {
           headers: {
@@ -28,11 +31,22 @@ export default {
           }
         })
 
-        console.log({res})
+        if (!res) {
+          new Error("ログアウトできませんでした")
+        }
+
+        if (!this.error) {
+          console.log("ログアウトしました")
+          window.localStorage.removeItem("uid")
+          window.localStorage.removeItem("name")
+          window.localStorage.removeItem("access-token")
+          window.localStorage.removeItem("client")
+          this.$router.push({ name: 'Welcome'})
+        }
 
         return res
       } catch(error) {
-        console.log({error})
+        this.error = "ログアウトできませんでした"
       }
     }
  }
